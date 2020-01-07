@@ -13,78 +13,108 @@
     <p>A processing project made with adam and i.</p>
     
     <script type="text/processing">
-     float circleSize;
-boolean red, green, blue;
-float r,g,b;
-
+     //PRESS THE UP KEY TO PLAY SCORE DISPLAYED ON THE BOTTOM
+Barry barry;
+IntList xlist = new IntList();
+int x = 0;
+int blocks = 1000;
+int lastTime = 0;
+int delta = 0;
+float speed = 0.2;
+int barryy = height-180;
+int barryx = 0;
+int yvel = 0;
+int score = 0;
 
 
 void setup(){
   size(1200,800);
-  setupOrClear();
-  circleSize = 30;
-}
-
-void setupOrClear(){
-  background(0); //black
-  fill(255);      //white for text
+  barry = new Barry();
+  fill(255,255,255);
   textSize(30);
-  text("Hover and move your mouse",10,40);
-  rect(width-200, 40, 150,40);
-  fill(0,0,255);
-  text("Clear",width-170,70);
-  red = false;
-  green = false;
-  blue = false;
+  
+  for (int i = 0; i <blocks; i+=2) {
+    xlist.append(int(600-x + i * random(300,500))); 
+    xlist.append(int(600-x +(i+1) * random(300,500)));
  
+
+  }
 }
 
 void draw(){
-  fill(r,g,b);
- 
-  if(mouseY>100){    //leave a restricted area at top of screen
-    ellipse(mouseX,mouseY,circleSize,circleSize);
-  }
- 
-  if(mouseX>width-200 && mouseX<width-50 && mouseY>40 && mouseY<80){ //in clear button
-    fill(0,255,0);
-    text("Clear",width-170,70);
-  }
-  else{                    //not hovering over clear button
-    fill(0,0,255);
-    text("Clear",width-170,70);
-  }
- 
-  if(keyPressed){
   
-      if(keyCode==UP){
-        circleSize=100;
-      }
-      else if(keyCode==DOWN){
-        circleSize-=5;
-      }
-     
-      if(key=='r'){   //toggle the red boolean with the "r" key
-        red=!red;
-      }
+  //setup
+  background(0,0,255);
+  delta = millis() - lastTime;
+  
+  //physics
+  if (barryy < height-180) {yvel-=2;}
+  barryy -= yvel;
+  if ( barryy >= height-180) {yvel=0;barryy=height-180;}
+  
+  
+  //drawing
+  text("score: " + score,20,50);
+  text("Press the up arrow to move up",170,50);
+  florr();
+  map1(x);
+  barry.update(barryx,barryy);
+  addscore(xlist, x,barryy, ceil(speed * delta));
+  //println(score);
+  
+  //finishing
+  x += (speed * delta);
+  lastTime = millis();
+  
+}
 
-  }  //end of keyPressed
- 
-  if(red){
-     r = random(0,255);             //add red to color spectrum
-     fill(255,0,0);                  //red square top right of screen
-     rect(width-300,50,50,50);
+void keyPressed(){
+  if (keyCode == UP) {
+    //println("up");
+    yvel = 20;
   }
-  else{                              //erase red square with black square
-    r = 0;                          //no red in our spectrum
-    fill(0);
-    rect(width-300,50,50,50);
-   
+}
+
+private void florr(){
+  fill(21,128,0);
+  rect(0,height -100,width,100);
+}
+
+private void map1(int x){
+  fill(212,195,170);
+  for (int i = 0; i<blocks; i+=2){
+    rect(xlist.get(i) - x,0,20,600);
+    rect(xlist.get(i+1) - x,200,20,600);
+  }  
+}
+
+private void addscore(IntList xpos, int x, int barrY,int step){
+  
+  for (int i = 0; i<xpos.size(); i++){
+    
+    if(int(xpos.get(i)-x) > 0 && int(xpos.get(i)-x) < step){ //decesion time
+       println("x" + x);
+      println("barryY" + barrY);
+      if(i%2 == 0 && barrY > 600 || i%2 == 1 && barrY < 200){ score++ ;} //collision
+      else {score--;}                                          //point
+    }
+    
+  }  
+}
+
+
+
+
+public class Barry{
+  public PImage A;
+  void setup() {
+    A = loadImage("./Images/R.PNG");
   }
- 
- 
- 
- 
+  
+  void update(int x, int y) {
+    fill(255,0,0);
+    rect(x,y,10,60);
+  }
 }
     </script>
     <canvas id="sketch" style="border: 1px solid black;"></canvas>
